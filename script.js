@@ -11,18 +11,30 @@ const gameboard =(function(){
     const board = Array.from({length: 3}, ()=> Array.from({length:3}, ()=> null));
     console.log(board);
     
+    let currentPlayerIndex =0;
+    const players = [
+        createPlayer("david",'x'),
+        createPlayer('minh', 'o')
+    ]
 
-    function makeMove(row,col,currentPlayer)
+    function makeMove(row,col)
     {
         if(board[row][col]=== null)
         {
-            board[row][col] = currentPlayer;
+            board[row][col] = players[currentPlayerIndex].piece;
         }
         
     }
-    function switchTurn(currentPlayer)
+    function switchTurn()
     {   
-        
+        if(currentPlayerIndex ===0)
+            {
+                currentPlayerIndex = 1;
+            }
+        else{
+            currentPlayerIndex = 0;
+        }
+        console.log(currentPlayerIndex)
     }
     function checkDiagonal(piece)
     {
@@ -120,26 +132,45 @@ const gameboard =(function(){
         }
         return false;
     }
-    function validateBoard(piece)
+    function checkIfBoardIsFull()
     {
+        return !board.some((cell) => cell.includes(null))
+    }
+    function validateBoard()
+    {
+        let piece  = players[currentPlayerIndex].piece;
+        
+
 
         if(checkRow(piece) || checkCol(piece) || checkDiagonal(piece))
         {
             console.log("You Win!")
+            return;
+        }
+        if(checkIfBoardIsFull())
+        {   
+            console.log("Tie Game")    
         }
         
     }
     function getBoard() {return board}
-   
+   function getCurrentPlayer()
+   {
+        return players[currentPlayerIndex];
+   }
 
     return { 
         
         makeMove,
+        switchTurn,
         getBoard,
+        getCurrentPlayer,
         validateBoard
+
     }
 })();
 const boardContainer = document.getElementById("gameBoard");
+
 function createBoard()
 {
     
@@ -170,12 +201,22 @@ boardContainer.addEventListener('click', function(event) {
         const row = Math.floor(index / BOARD_SIZE);
         const col = index % BOARD_SIZE;
         console.log(`Div clicked at position (${row}, ${col})`);
+        if(event.target.textContent == '')
+            {
+                event.target.textContent = gameboard.getCurrentPlayer().piece;
+            }
+        else{
+            return
+        }
         
-        event.target.textContent = "x";
+        gameboard.makeMove(row,col);
         
-        gameboard.makeMove(row,col,player1.piece);
         console.log(gameboard.getBoard());
-        gameboard.validateBoard('x')
+        gameboard.validateBoard()
+        gameboard.switchTurn()
+        
+        
+        
     }
 });
 
