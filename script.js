@@ -27,14 +27,21 @@ const gameboard =(function(){
     }
     function switchTurn()
     {   
+        const playerOne = document.getElementById("playerOne");
+        const playerTwo = document.getElementById("playerTwo");
         if(currentPlayerIndex ===0)
             {
                 currentPlayerIndex = 1;
+                playerOne.classList.remove("active")
+                playerTwo.classList.add("active")
             }
         else{
             currentPlayerIndex = 0;
+            playerOne.classList.add("active")
+            playerTwo.classList.remove("active")
         }
         console.log(currentPlayerIndex)
+        
     }
     function checkDiagonal(piece)
     {
@@ -158,6 +165,9 @@ const gameboard =(function(){
    {
         return players[currentPlayerIndex];
    }
+   function getPlayers(){
+        return players;
+   }
 
     return { 
         
@@ -165,12 +175,30 @@ const gameboard =(function(){
         switchTurn,
         getBoard,
         getCurrentPlayer,
+        getPlayers,
         validateBoard
 
     }
 })();
 const boardContainer = document.getElementById("gameBoard");
+const container = document.getElementById("container");
+function createPlayerBoard()
+{
+    const player1Div = document.createElement("div");
+    player1Div.id="playerOne";
+    player1Div.style.width = "100px";
+    player1Div.style.height= "50px";
+    player1Div.textContent=gameboard.getPlayers()[0].name;
+    container.appendChild(player1Div);
 
+    const player2Div = document.createElement("div");
+    player2Div.id = "playerTwo";
+    player2Div.style.width = "100px";
+    player2Div.style.height= "50px";
+    player2Div.textContent=gameboard.getPlayers()[1].name;
+    container.appendChild(player2Div);
+
+}
 function createBoard()
 {
     
@@ -188,6 +216,7 @@ function createBoard()
         {
             console.log('tex')
             const squareDiv=document.createElement("div");
+            squareDiv.classList.add("square");
             squareDiv.style.width = "100px";
             squareDiv.style.height = "100px";
             squareDiv.style.border = "1px solid";
@@ -203,7 +232,9 @@ boardContainer.addEventListener('click', function(event) {
         console.log(`Div clicked at position (${row}, ${col})`);
         if(event.target.textContent == '')
             {
+                
                 event.target.textContent = gameboard.getCurrentPlayer().piece;
+                
             }
         else{
             return
@@ -219,21 +250,18 @@ boardContainer.addEventListener('click', function(event) {
         
     }
 });
+document.getElementById("resetBtn").addEventListener('click', (e)=>{
+    const container = document.getElementById("gameBoard");
+    container.innerHTML='';
 
+});
 
-
+createPlayerBoard();
 createBoard();
 
 
 
 
-const player1 = createPlayer('David','x');
-const player2 = createPlayer('Minh','y');
 
-console.log(gameboard.getBoard());
-
-// gameboard.makeMove(0,0,player1.piece);
-// gameboard.makeMove(1,1,player1.piece);
-// gameboard.makeMove(2,2,player1.piece);
 
 
