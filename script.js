@@ -10,13 +10,17 @@ function createPlayer(name,piece){
 const gameboard =(function(){
     const board = Array.from({length: 3}, ()=> Array.from({length:3}, ()=> null));
     console.log(board);
-    
+    let gameActive= true;
     let currentPlayerIndex =0;
+    
     const players = [
         createPlayer("david",'x'),
         createPlayer('minh', 'o')
     ]
-
+    function isGameActive()
+    {
+        return gameActive;
+    }
     function makeMove(row,col)
     {
         if(board[row][col]=== null)
@@ -143,40 +147,91 @@ const gameboard =(function(){
     {
         return !board.some((cell) => cell.includes(null))
     }
+    function createBoard()
+    {
+        
+        if (!boardContainer) {
+            console.error("Element with id 'game-board' not found.");
+            return;
+        }
+        boardContainer.style.display = 'grid';
+        boardContainer.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 100px)`; // 3 columns of 100px each
+        boardContainer.style.gridTemplateRows = `repeat(${BOARD_SIZE}, 100px)`;    // 3 rows of 100px each
+
+        for(let i = 0; i<BOARD_SIZE;i++)
+        {
+            for(let j=0; j<BOARD_SIZE;j++)
+            {
+                console.log('tex')
+                const squareDiv=document.createElement("div");
+                squareDiv.classList.add("square");
+                squareDiv.style.width = "100px";
+                squareDiv.style.height = "100px";
+                squareDiv.style.border = "1px solid";
+                boardContainer.appendChild(squareDiv);
+            }
+        }
+    }
     function validateBoard()
     {
         let piece  = players[currentPlayerIndex].piece;
         
-
+        
 
         if(checkRow(piece) || checkCol(piece) || checkDiagonal(piece))
         {
+            gameActive= false;
+           
             console.log("You Win!")
             return;
         }
         if(checkIfBoardIsFull())
         {   
+            gameActive = false;
             console.log("Tie Game")    
         }
         
     }
+    function resetBoard()
+    {
+        for(let i =0;i<board.length;i++)
+            {
+                for(let j=0; j< board[i].length;j++)
+                    {
+                        board[i][j]=null;
+                    }
+            }
+
+        const squareDiv = document.querySelectorAll('div.square')
+        squareDiv.forEach(div=>{
+            div.textContent='';
+        })
+        const playerOne = document.getElementById("playerOne");
+        const playerTwo = document.getElementById("playerTwo");
+        playerOne.classList.remove('active');
+        playerTwo.classList.remove('active');
+        gameActive = true;
+    }
     function getBoard() {return board}
-   function getCurrentPlayer()
-   {
-        return players[currentPlayerIndex];
-   }
-   function getPlayers(){
-        return players;
-   }
+    function getCurrentPlayer()
+    {
+            return players[currentPlayerIndex];
+    }
+    function getPlayers(){
+            return players;
+    }
 
     return { 
-        
+        gameActive,
         makeMove,
         switchTurn,
         getBoard,
         getCurrentPlayer,
         getPlayers,
-        validateBoard
+        validateBoard,
+        createBoard,
+        resetBoard,
+        isGameActive
 
     }
 })();
@@ -199,36 +254,21 @@ function createPlayerBoard()
     container.appendChild(player2Div);
 
 }
-function createBoard()
-{
-    
-    if (!boardContainer) {
-        console.error("Element with id 'game-board' not found.");
-        return;
-    }
-    boardContainer.style.display = 'grid';
-    boardContainer.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 100px)`; // 3 columns of 100px each
-    boardContainer.style.gridTemplateRows = `repeat(${BOARD_SIZE}, 100px)`;    // 3 rows of 100px each
 
-    for(let i = 0; i<BOARD_SIZE;i++)
-    {
-        for(let j=0; j<BOARD_SIZE;j++)
-        {
-            console.log('tex')
-            const squareDiv=document.createElement("div");
-            squareDiv.classList.add("square");
-            squareDiv.style.width = "100px";
-            squareDiv.style.height = "100px";
-            squareDiv.style.border = "1px solid";
-            boardContainer.appendChild(squareDiv);
-        }
-    }
-}
 boardContainer.addEventListener('click', function(event) {
+    if(!gameboard.isGameActive())
+    {
+            return;
+    }
     if (event.target && event.target.nodeName === 'DIV') {
         const index = Array.from(boardContainer.children).indexOf(event.target);
         const row = Math.floor(index / BOARD_SIZE);
         const col = index % BOARD_SIZE;
+
+        if(row == -1 || col == -1)
+            {
+                return;
+            }
         console.log(`Div clicked at position (${row}, ${col})`);
         if(event.target.textContent == '')
             {
@@ -251,13 +291,13 @@ boardContainer.addEventListener('click', function(event) {
     }
 });
 document.getElementById("resetBtn").addEventListener('click', (e)=>{
-    const container = document.getElementById("gameBoard");
-    container.innerHTML='';
-
+    
+    gameboard.resetBoard();
+    console.log(gameboard.getBoard())
 });
 
 createPlayerBoard();
-createBoard();
+gameboard.createBoard();
 
 
 
